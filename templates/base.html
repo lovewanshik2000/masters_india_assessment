@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Discount Campaign Management{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            flex: 1;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .alert {
+            margin-top: 1rem;
+        }
+
+        footer {
+            background-color: #f8f9fa;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'campaign-list' %}">
+                💰 Discount Campaign System
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if user.is_authenticated %}
+                    <!-- Customers Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="customersDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            👥 Customers
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'customer-list' %}">📋 View All Customers</a></li>
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item" href="{% url 'customer-create' %}">➕ Add New Customer</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+
+                    <!-- Campaigns Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="campaignsDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            🎯 Campaigns
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'campaign-list' %}">📋 View All Campaigns</a></li>
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item" href="{% url 'campaign-create' %}">➕ Create Campaign</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+
+                    <!-- Discounts Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="discountsDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            💸 Discounts
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'discount-preview' %}">🔍 Preview Discounts</a>
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'apply-discount' %}">✅ Apply Discounts</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Usage & Reports -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'usage-list' %}">📊 Usage Records</a>
+                    </li>
+
+                    <!-- API Documentation -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="apiDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            📚 API Docs
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/swagger/" target="_blank">📖 Swagger UI</a></li>
+                            <li><a class="dropdown-item" href="/redoc/" target="_blank">📘 ReDoc</a></li>
+                            {% if user.is_staff %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/admin/" target="_blank">⚙️ Admin Panel</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            👤 {{ user.username }}
+                            {% if user.is_staff %}
+                            <span class="badge bg-warning text-dark">Staff</span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">🚪 Logout</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">🔐 Login</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container content">
+        <!-- Django Messages -->
+        {% block messages %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endblock %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-muted">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 Discount Campaign Management System</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

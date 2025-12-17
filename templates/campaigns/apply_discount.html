@@ -1,0 +1,216 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+
+{% block title %}Apply Discount{% endblock %}
+
+{# Override messages block to prevent duplicate display - messages shown inside card instead #}
+{% block messages %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Apply Discount to Order</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="applyDiscountForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="customer_id" class="form-label">Customer ID *</label>
+                            <input type="text" class="form-control" id="customer_id" name="customer_id" required
+                                placeholder="e.g., CUST001" value="{{ customer_id }}">
+                            <div class="form-text">Enter the customer's unique identifier</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cart_total" class="form-label">Cart Total (₹) *</label>
+                            <input type="number" class="form-control" id="cart_total" name="cart_total" step="0.01"
+                                min="0" required placeholder="0.00" value="{{ cart_total }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="delivery_fee" class="form-label">Delivery Fee (₹) *</label>
+                            <input type="number" class="form-control" id="delivery_fee" name="delivery_fee" step="0.01"
+                                min="0" required placeholder="0.00" value="{{ delivery_fee }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Select Campaigns to Apply *</label>
+                            <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                {% if available_campaigns %}
+                                {% for campaign in available_campaigns %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="campaign_ids"
+                                        value="{{ campaign.id }}" id="campaign{{ campaign.id }}">
+                                    <label class="form-check-label" for="campaign{{ campaign.id }}">
+                                        <strong>{{ campaign.name }}</strong>
+                                        <span class="badge bg-{{ campaign.discount_type|lower }}">
+                                            {{ campaign.discount_type }}
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">
+                                            Discount: ₹{{ campaign.discount_value }} |
+                                            Budget: ₹{{ campaign.remaining_budget }}
+                                        </small>
+                                    </label>
+                                </div>
+                                {% endfor %}
+                                {% else %}
+                                <p class="text-muted mb-0">
+                                    <i class="bi bi-info-circle"></i>
+                                    Enter customer ID and amounts above to see available campaigns
+                                </p>
+                                {% endif %}
+
+                                <!-- Unavailable Campaigns Section -->
+                                {% if unavailable_campaigns %}
+                                <hr class="my-3">
+                                <h6 class="text-muted small">Unavailable Campaigns</h6>
+                                {% for item in unavailable_campaigns %}
+                                <div class="alert alert-warning py-2 px-3 mb-2 small">
+                                    <strong>{{ item.campaign.name }}</strong>
+                                    <br>
+                                    <i class="bi bi-exclamation-triangle"></i> {{ item.reason }}
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" name="action" value="preview">
+                                <i class="bi bi-eye"></i> Preview Discounts
+                            </button>
+                            {% if user.is_staff and available_campaigns %}
+                            <button type="submit" class="btn btn-success btn-lg" name="action" value="apply">
+                                <i class="bi bi-check-circle"></i> Apply Discounts
+                            </button>
+                            {% elif not user.is_staff and available_campaigns %}
+                            <div class="alert alert-warning mb-0">
+                                <i class="bi bi-info-circle"></i> Only staff members can apply discounts. You can
+                                preview discounts above.
+                            </div>
+                            {% endif %}
+                            <a href="{% url 'campaign-list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            {% if show_results %}
+            <div class="card mt-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-check-circle"></i>
+                        {% if applied %}Discounts Applied Successfully!{% else %}Discount Preview{% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Customer</h6>
+                            <p class="mb-1"><strong>{{ result.customer.name }}</strong></p>
+                            <p class="text-muted small">{{ result.customer.customer_id }}</p>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <h6>Order Summary</h6>
+                            <p class="mb-1">Cart Total: <strong>₹{{ result.original_cart_total }}</strong></p>
+                            <p class="mb-1">Delivery Fee: <strong>₹{{ result.original_delivery_fee }}</strong></p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6>Applied Discounts</h6>
+                    {% if result.applied_discounts %}
+                    <ul class="list-group mb-3">
+                        {% for discount in result.applied_discounts %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ discount.campaign_name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ discount.discount_type }} Discount</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">
+                                -₹{{ discount.discount_applied }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No discounts applied</p>
+                    {% endif %}
+
+                    <div class="alert alert-info">
+                        <div class="row">
+                            <div class="col-6">
+                                <p class="mb-1"><strong>Cart Discount:</strong></p>
+                                <p class="mb-1"><strong>Delivery Discount:</strong></p>
+                                <hr class="my-2">
+                                <p class="mb-1"><strong>Final Cart Total:</strong></p>
+                                <p class="mb-1"><strong>Final Delivery Fee:</strong></p>
+                            </div>
+                            <div class="col-6 text-end">
+                                <p class="mb-1 text-success">-₹{{ result.total_cart_discount }}</p>
+                                <p class="mb-1 text-success">-₹{{ result.total_delivery_discount }}</p>
+                                <hr class="my-2">
+                                <p class="mb-1">₹{{ result.final_cart_total }}</p>
+                                <p class="mb-1">₹{{ result.final_delivery_fee }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                            <h4 class="mb-0">
+                                Final Amount: <span class="text-primary">₹{{ result.final_amount }}</span>
+                            </h4>
+                            <p class="text-success mb-0">
+                                You saved ₹{{ result.total_cart_discount|add:result.total_delivery_discount }}!
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if not applied and user.is_staff %}
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-success btn-lg"
+                            onclick="document.getElementById('applyDiscountForm').querySelector('[name=action][value=apply]').click()">
+                            <i class="bi bi-check-circle"></i> Confirm and Apply Discounts
+                        </button>
+                    </div>
+                    {% elif not applied and not user.is_staff %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-info-circle"></i> Only staff members can apply discounts. Contact an
+                        administrator to apply these discounts.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge.bg-cart {
+        background-color: #0d6efd !important;
+    }
+
+    .badge.bg-delivery {
+        background-color: #198754 !important;
+    }
+</style>
+{% endblock %}

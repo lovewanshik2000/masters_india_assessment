@@ -1,0 +1,186 @@
+{% extends 'base_sidebar.html' %}
+
+{% block title %}{{ form_title }}{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">{{ form_title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Display non-field errors -->
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Basic Information -->
+                    <h5 class="border-bottom pb-2 mb-3">Basic Information</h5>
+
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            Campaign Name <span class="text-danger">*</span>
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small">{{ form.name.errors }}</div>
+                        {% endif %}
+                        {% if form.name.help_text %}
+                        <div class="form-text">{{ form.name.help_text }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger small">{{ form.description.errors }}</div>
+                        {% endif %}
+                        {% if form.description.help_text %}
+                        <div class="form-text">{{ form.description.help_text }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Discount Details -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Discount Details</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.discount_type.id_for_label }}" class="form-label">
+                                Discount Type <span class="text-danger">*</span>
+                            </label>
+                            {{ form.discount_type }}
+                            {% if form.discount_type.errors %}
+                            <div class="text-danger small">{{ form.discount_type.errors }}</div>
+                            {% endif %}
+                            {% if form.discount_type.help_text %}
+                            <div class="form-text">{{ form.discount_type.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.discount_value.id_for_label }}" class="form-label">
+                                Discount Value (₹) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.discount_value }}
+                            {% if form.discount_value.errors %}
+                            <div class="text-danger small">{{ form.discount_value.errors }}</div>
+                            {% endif %}
+                            {% if form.discount_value.help_text %}
+                            <div class="form-text">{{ form.discount_value.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Date Range -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Campaign Period</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.start_date.id_for_label }}" class="form-label">
+                                Start Date <span class="text-danger">*</span>
+                            </label>
+                            {{ form.start_date }}
+                            {% if form.start_date.errors %}
+                            <div class="text-danger small">{{ form.start_date.errors }}</div>
+                            {% endif %}
+                            {% if form.start_date.help_text %}
+                            <div class="form-text">{{ form.start_date.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.end_date.id_for_label }}" class="form-label">
+                                End Date <span class="text-danger">*</span>
+                            </label>
+                            {{ form.end_date }}
+                            {% if form.end_date.errors %}
+                            <div class="text-danger small">{{ form.end_date.errors }}</div>
+                            {% endif %}
+                            {% if form.end_date.help_text %}
+                            <div class="form-text">{{ form.end_date.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Budget & Limits -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Budget & Limits</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.total_budget.id_for_label }}" class="form-label">
+                                Total Budget (₹) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.total_budget }}
+                            {% if form.total_budget.errors %}
+                            <div class="text-danger small">{{ form.total_budget.errors }}</div>
+                            {% endif %}
+                            {% if form.total_budget.help_text %}
+                            <div class="form-text">{{ form.total_budget.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.max_transactions_per_customer_per_day.id_for_label }}"
+                                class="form-label">
+                                Max Uses Per Customer Per Day <span class="text-danger">*</span>
+                            </label>
+                            {{ form.max_transactions_per_customer_per_day }}
+                            {% if form.max_transactions_per_customer_per_day.errors %}
+                            <div class="text-danger small">{{ form.max_transactions_per_customer_per_day.errors }}</div>
+                            {% endif %}
+                            {% if form.max_transactions_per_customer_per_day.help_text %}
+                            <div class="form-text">{{ form.max_transactions_per_customer_per_day.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Target Customers -->
+                    <h5 class="border-bottom pb-2 mb-3 mt-4">Target Customers</h5>
+
+                    <div class="mb-3">
+                        <label for="{{ form.targeted_customers.id_for_label }}" class="form-label">
+                            Targeted Customers <span class="text-danger">*</span>
+                        </label>
+                        {{ form.targeted_customers }}
+                        {% if form.targeted_customers.errors %}
+                        <div class="text-danger small">{{ form.targeted_customers.errors }}</div>
+                        {% endif %}
+                        {% if form.targeted_customers.help_text %}
+                        <div class="form-text">{{ form.targeted_customers.help_text }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="mb-3 form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                            Campaign is Active
+                        </label>
+                        {% if form.is_active.errors %}
+                        <div class="text-danger small">{{ form.is_active.errors }}</div>
+                        {% endif %}
+                        {% if form.is_active.help_text %}
+                        <div class="form-text">{{ form.is_active.help_text }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{% url 'campaign-list' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

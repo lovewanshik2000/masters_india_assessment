@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Discount Campaign Management{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <style>
+        body {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding-top: 20px;
+            transition: all 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 15px 20px;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            margin: 5px 10px;
+        }
+
+        .sidebar-nav a {
+            display: block;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-nav a:hover,
+        .sidebar-nav a.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav a i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .sidebar-section {
+            padding: 10px 20px 5px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        .topbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0;
+        }
+
+        .content-wrapper {
+            padding: 20px 30px;
+        }
+
+        /* User Badge */
+        .user-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            margin: 10px;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .user-badge .user-name {
+            font-weight: 600;
+            display: block;
+        }
+
+        .user-badge .user-role {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        /* Mobile Toggle */
+        .sidebar-toggle {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: inline-block;
+            }
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <a href="{% url 'dashboard' %}" class="sidebar-brand">
+            💰 Campaign System
+        </a>
+
+        {% if user.is_authenticated %}
+        <div class="user-badge">
+            <span class="user-name">{{ user.username }}</span>
+            <span class="user-role">
+                {% if user.is_staff %}
+                <i class="bi bi-shield-check"></i> Administrator
+                {% else %}
+                <i class="bi bi-person"></i> User
+                {% endif %}
+            </span>
+        </div>
+
+        <ul class="sidebar-nav">
+            <li class="sidebar-section">Main</li>
+            <li>
+                <a href="{% url 'dashboard' %}">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+
+            <li class="sidebar-section">Management</li>
+            <li>
+                <a href="{% url 'customer-list' %}">
+                    <i class="bi bi-people"></i> Customers
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'campaign-list' %}">
+                    <i class="bi bi-megaphone"></i> Campaigns
+                </a>
+            </li>
+
+            <li class="sidebar-section">Operations</li>
+            <li>
+                <a href="{% url 'discount-preview' %}">
+                    <i class="bi bi-search"></i> Preview Discounts
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'apply-discount' %}">
+                    <i class="bi bi-check-circle"></i> Apply Discounts
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'usage-list' %}">
+                    <i class="bi bi-bar-chart-line"></i> Usage Records
+                </a>
+            </li>
+
+            <li class="sidebar-section">Documentation</li>
+            <li>
+                <a href="/swagger/" target="_blank">
+                    <i class="bi bi-book"></i> API Docs (Swagger)
+                </a>
+            </li>
+            <li>
+                <a href="/redoc/" target="_blank">
+                    <i class="bi bi-file-text"></i> API Docs (ReDoc)
+                </a>
+            </li>
+
+            {% if user.is_staff %}
+            <li class="sidebar-section">Admin</li>
+            <li>
+                <a href="/admin/" target="_blank">
+                    <i class="bi bi-gear"></i> Admin Panel
+                </a>
+            </li>
+            {% endif %}
+
+            <li class="sidebar-section">Account</li>
+            <li>
+                <a href="{% url 'logout' %}">
+                    <i class="bi bi-box-arrow-right"></i> Logout
+                </a>
+            </li>
+        </ul>
+        {% else %}
+        <ul class="sidebar-nav">
+            <li>
+                <a href="{% url 'login' %}">
+                    <i class="bi bi-box-arrow-in-right"></i> Login
+                </a>
+            </li>
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <button class="btn btn-link sidebar-toggle" onclick="toggleSidebar()">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                    <span class="fs-5 fw-bold">{% block page_title %}Dashboard{% endblock %}</span>
+                </div>
+                <div>
+                    {% if user.is_authenticated %}
+                    <span class="text-muted">
+                        <i class="bi bi-person-circle"></i> {{ user.get_full_name|default:user.username }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Django Messages -->
+            {% block messages %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endblock %}
+
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        // Highlight active menu item
+        document.addEventListener('DOMContentLoaded', function () {
+            const currentPath = window.location.pathname;
+            const menuLinks = document.querySelectorAll('.sidebar-nav a');
+
+            menuLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,172 @@
+{% extends 'base_sidebar.html' %}
+
+{% block title %}Discount Preview{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-lg-10 offset-lg-1">
+        <h2 class="mb-4">💰 View Your Applicable Discounts</h2>
+
+        <!-- Input Form -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Enter Your Details</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.customer_id.id_for_label }}" class="form-label">
+                                Customer ID <span class="text-danger">*</span>
+                            </label>
+                            {{ form.customer_id }}
+                            {% if form.customer_id.errors %}
+                            <div class="text-danger small">{{ form.customer_id.errors }}</div>
+                            {% endif %}
+                            {% if form.customer_id.help_text %}
+                            <div class="form-text">{{ form.customer_id.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.cart_total.id_for_label }}" class="form-label">
+                                Cart Total (₹) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.cart_total }}
+                            {% if form.cart_total.errors %}
+                            <div class="text-danger small">{{ form.cart_total.errors }}</div>
+                            {% endif %}
+                            {% if form.cart_total.help_text %}
+                            <div class="form-text">{{ form.cart_total.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.delivery_fee.id_for_label }}" class="form-label">
+                                Delivery Fee (₹) <span class="text-danger">*</span>
+                            </label>
+                            {{ form.delivery_fee }}
+                            {% if form.delivery_fee.errors %}
+                            <div class="text-danger small">{{ form.delivery_fee.errors }}</div>
+                            {% endif %}
+                            {% if form.delivery_fee.help_text %}
+                            <div class="form-text">{{ form.delivery_fee.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            🔍 Check Available Discounts
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results -->
+        {% if show_results %}
+        <div class="card mb-4 border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Results for {{ customer.name }} ({{ customer.customer_id }})</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Cart Total:</strong> ₹{{ cart_total }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Delivery Fee:</strong> ₹{{ delivery_fee }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applicable Campaigns -->
+        {% if applicable_campaigns %}
+        <h4 class="text-success mb-3">✅ Applicable Discounts ({{ applicable_campaigns|length }})</h4>
+
+        {% for item in applicable_campaigns %}
+        <div class="card mb-3 border-success">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="card-title">{{ item.campaign.name }}</h5>
+                        {% if item.campaign.description %}
+                        <p class="card-text text-muted">{{ item.campaign.description }}</p>
+                        {% endif %}
+                        <div class="mb-2">
+                            {% if item.campaign.discount_type == 'CART' %}
+                            <span class="badge bg-primary">🛒 Cart Discount</span>
+                            {% else %}
+                            <span class="badge bg-info">🚚 Delivery Discount</span>
+                            {% endif %}
+                            <span class="badge bg-secondary">Max: ₹{{ item.campaign.discount_value }}</span>
+                        </div>
+                        <small class="text-muted">
+                            Valid: {{ item.campaign.start_date|date:"M d, Y" }} - {{ item.campaign.end_date|date:"M d, Y" }}
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="alert alert-success mb-0">
+                            <h3 class="mb-0">₹{{ item.applicable_discount }}</h3>
+                            <small>You Save</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="alert alert-info">
+            <strong>💡 Tip:</strong> These discounts can be applied at checkout based on campaign rules and
+            availability.
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <h5>😔 No Applicable Discounts</h5>
+            <p>Unfortunately, there are no active discount campaigns available for your current cart.</p>
+        </div>
+        {% endif %}
+
+        <!-- Not Applicable Campaigns -->
+        {% if not_applicable_campaigns %}
+        <h4 class="text-muted mb-3 mt-4">❌ Not Applicable ({{ not_applicable_campaigns|length }})</h4>
+
+        <div class="accordion" id="notApplicableAccordion">
+            {% for item in not_applicable_campaigns %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ forloop.counter }}">
+                        {{ item.campaign.name }} - <span class="text-danger ms-2">{{ item.reason }}</span>
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse"
+                    data-bs-parent="#notApplicableAccordion">
+                    <div class="accordion-body">
+                        <p><strong>Description:</strong> {{ item.campaign.description|default:"N/A" }}</p>
+                        <p><strong>Discount:</strong> ₹{{ item.campaign.discount_value }}
+                            ({% if item.campaign.discount_type == 'CART' %}Cart{% else %}Delivery{% endif %})</p>
+                        <p><strong>Valid Period:</strong> {{ item.campaign.start_date|date:"M d, Y" }} - {{
+                        <p><strong>Valid Period:</strong> {{ item.campaign.start_date|date:"M d, Y" }} - {{ item.campaign.end_date|date:"M d, Y" }}</p>
+                        <p class="text-danger"><strong>Reason:</strong> {{ item.reason }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'base_sidebar.html' %}
+{% load static %}
+
+{% block title %}Campaign Usage Records{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Campaign Usage Records</h2>
+        <div>
+            {% if not user.is_staff %}
+            <span class="badge bg-info me-2">👁️ View Only Mode</span>
+            {% endif %}
+            <a href="{% url 'campaign-list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Campaigns
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="campaign" class="form-label">Campaign</label>
+                    <select name="campaign" id="campaign" class="form-select">
+                        <option value="">All Campaigns</option>
+                        {% for campaign in campaigns %}
+<option value="{{ campaign.id }}" {% if request.GET.campaign == campaign.id|stringformat:"s" %}selected{% endif %}>
+                            {{ campaign.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="customer" class="form-label">Customer ID</label>
+                    <input type="text" name="customer_id" id="customer" class="form-control"
+                        value="{{ request.GET.customer_id }}" placeholder="e.g., CUST001">
+                </div>
+                <div class="col-md-4">
+                    <label for="date" class="form-label">Usage Date</label>
+                    <input type="date" name="usage_date" id="date" class="form-control"
+                        value="{{ request.GET.usage_date }}">
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    <a href="{% url 'usage-list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Usage Records Table -->
+    {% if usage_records %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Campaign</th>
+                            <th>Customer</th>
+                            <th>Usage Date</th>
+                            <th>Usage Count</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usage in usage_records %}
+                        <tr>
+                            <td>{{ usage.id }}</td>
+                            <td>
+                                <strong>{{ usage.campaign.name }}</strong><br>
+                                <small class="text-muted">{{ usage.campaign.discount_type }}</small>
+                            </td>
+                            <td>
+                                <strong>{{ usage.customer.name }}</strong><br>
+                                <small class="text-muted">{{ usage.customer.customer_id }}</small>
+                            </td>
+                            <td>{{ usage.usage_date|date:"Y-m-d" }}</td>
+                            <td>
+                                <span class="badge bg-info">{{ usage.usage_count }}</span>
+                            </td>
+                            <td>{{ usage.updated_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page=1{% if request.GET.campaign %}&campaign={{ request.GET.campaign }}{% endif %}{% if request.GET.customer_id %}&customer_id={{ request.GET.customer_id }}{% endif %}{% if request.GET.usage_date %}&usage_date={{ request.GET.usage_date }}{% endif %}">First</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ page_obj.previous_page_number }}{% if request.GET.campaign %}&campaign={{ request.GET.campaign }}{% endif %}{% if request.GET.customer_id %}&customer_id={{ request.GET.customer_id }}{% endif %}{% if request.GET.usage_date %}&usage_date={{ request.GET.usage_date }}{% endif %}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ page_obj.next_page_number }}{% if request.GET.campaign %}&campaign={{ request.GET.campaign }}{% endif %}{% if request.GET.customer_id %}&customer_id={{ request.GET.customer_id }}{% endif %}{% if request.GET.usage_date %}&usage_date={{ request.GET.usage_date }}{% endif %}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.campaign %}&campaign={{ request.GET.campaign }}{% endif %}{% if request.GET.customer_id %}&customer_id={{ request.GET.customer_id }}{% endif %}{% if request.GET.usage_date %}&usage_date={{ request.GET.usage_date }}{% endif %}">Last</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No usage records found.
+        {% if request.GET.campaign or request.GET.customer_id or request.GET.usage_date %}
+        Try adjusting your filters.
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

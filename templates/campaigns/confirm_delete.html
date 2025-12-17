@@ -1,0 +1,80 @@
+{% extends 'base_sidebar.html' %}
+
+{% block title %}Delete Campaign{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-lg-6 offset-lg-3">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">⚠️ Confirm Deletion</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Warning:</strong> This action cannot be undone!
+                </div>
+
+                <h5>Campaign Details:</h5>
+                <table class="table table-bordered">
+                    <tr>
+                        <th width="40%">Name:</th>
+                        <td>{{ object.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Description:</th>
+                        <td>{{ object.description|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Discount Type:</th>
+                        <td>
+                            {% if object.discount_type == 'CART' %}
+                            <span class="badge bg-primary">Cart Discount</span>
+                            {% else %}
+                            <span class="badge bg-info">Delivery Discount</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Discount Value:</th>
+                        <td>₹{{ object.discount_value }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date Range:</th>
+                        <td>{{ object.start_date|date:"M d, Y" }} to {{ object.end_date|date:"M d, Y" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Budget:</th>
+                        <td>₹{{ object.consumed_budget }} / ₹{{ object.total_budget }}</td>
+                    </tr>
+                    <tr>
+                        <th>Targeted Customers:</th>
+                        <td>{{ object.targeted_customers.count }} customer(s)</td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            {% if object.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+
+                <p class="text-danger">
+                    <strong>Are you sure you want to delete this campaign?</strong>
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'campaign-list' %}" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-danger">Yes, Delete Campaign</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

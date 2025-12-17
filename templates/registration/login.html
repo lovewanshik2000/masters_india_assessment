@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row mt-5">
+    <div class="col-md-4 offset-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">🔐 Login</h4>
+            </div>
+            <div class="card-body">
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Login failed.</strong> Please check your username and password.
+                </div>
+                {% endif %}
+
+                {% if next %}
+                {% if user.is_authenticated %}
+                <div class="alert alert-warning">
+                    Your account doesn't have access to this page. Please login with an account that has access.
+                </div>
+                {% endif %}
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" id="{{ form.username.id_for_label }}"
+                            placeholder="Enter username" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control"
+                            id="{{ form.password.id_for_label }}" placeholder="Enter password" required>
+                    </div>
+
+                    <input type="hidden" name="next" value="{{ next }}">
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <div class="text-center text-muted">
+                    <small>
+                        <strong>Test Accounts:</strong><br>
+                        Admin: Create superuser with <code>python manage.py createsuperuser</code><br>
+                        Customer: Any authenticated user can view discounts
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

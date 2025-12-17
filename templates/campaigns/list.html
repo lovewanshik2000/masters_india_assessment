@@ -1,0 +1,193 @@
+{% extends 'base_sidebar.html' %}
+
+{% block title %}Campaigns - Admin{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📋 Campaign Management</h2>
+            {% if user.is_staff %}
+            <a href="{% url 'campaign-create' %}" class="btn btn-primary">
+                ➕ Create New Campaign
+            </a>
+            {% else %}
+            <span class="badge bg-info">👁️ View Only Mode</span>
+            {% endif %}
+        </div>
+
+        <!-- Campaign Stats -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">✅ Active Campaigns</h5>
+                        <p class="card-text display-6">{{ active_count }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-secondary">
+                    <div class="card-body">
+                        <h5 class="card-title text-secondary">❌ Inactive Campaigns</h5>
+                        <p class="card-text display-6">{{ inactive_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-auto">
+                        <label class="form-label">Filter by Status:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select name="active" class="form-select" onchange="this.form.submit()">
+                            <option value="" {% if not filter_active %}selected{% endif %}>All Campaigns</option>
+                            <option value="true" {% if filter_active is True %}selected{% endif %}>Active Only</option>
+                            <option value="false" {% if filter_active is False %}selected{% endif %}>Inactive Only
+                            </option>
+                        </select>
+                    </div>
+                    {% if filter_active %}
+                    <div class="col-auto">
+                        <a href="{% url 'campaign-list' %}" class="btn btn-outline-secondary">Clear Filter</a>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- Campaigns Table -->
+        {% if campaigns %}
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Discount</th>
+                        <th>Date Range</th>
+                        <th>Budget</th>
+                        <th>Status</th>
+                        <th>Valid</th>
+                        {% if user.is_staff %}
+                        <th>Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for campaign in campaigns %}
+                    <tr>
+                        <td>
+                            <strong>{{ campaign.name }}</strong>
+                            {% if campaign.description %}
+                            <br><small class="text-muted">{{ campaign.description|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if campaign.discount_type == 'CART' %}
+                            <span class="badge bg-primary">🛒 Cart</span>
+                            {% else %}
+                            <span class="badge bg-info">🚚 Delivery</span>
+                            {% endif %}
+                        </td>
+                        <td>₹{{ campaign.discount_value }}</td>
+                        <td>
+                            <small>
+                                {{ campaign.start_date|date:"M d, Y" }}<br>
+                                to {{ campaign.end_date|date:"M d, Y" }}
+                            </small>
+                        </td>
+                        <td>
+                            <small>
+                                ₹{{ campaign.consumed_budget }} / ₹{{ campaign.total_budget }}<br>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar"
+                                        style="width: {% widthratio campaign.consumed_budget campaign.total_budget 100 %}%">
+                                    </div>
+                                </div>
+                            </small>
+                        </td>
+                        <td>
+                            {% if campaign.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if campaign.is_valid %}
+                            <span class="badge bg-success">✓ Valid</span>
+                            {% else %}
+                            <span class="badge bg-danger">✗ Invalid</span>
+                            {% endif %}
+                        </td>
+                        {% if user.is_staff %}
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'campaign-update' campaign.pk %}" class="btn btn-outline-primary"
+                                    title="Edit">
+                                    ✏️
+                                </a>
+                                <a href="{% url 'campaign-delete' campaign.pk %}" class="btn btn-outline-danger"
+                                    title="Delete">
+                                    🗑️
+                                </a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page=1{% if filter_active %}&active={{ filter_active }}{% endif %}">First</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page={{ page_obj.previous_page_number }}{% if filter_active %}&active={{ filter_active }}{% endif %}">Previous</a>
+                </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page={{ page_obj.next_page_number }}{% if filter_active %}&active={{ filter_active }}{% endif %}">Next</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link"
+                        href="?page={{ page_obj.paginator.num_pages }}{% if filter_active %}&active={{ filter_active }}{% endif %}">Last</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="alert alert-info">
+            <h5>No campaigns found</h5>
+            <p>{% if user.is_staff %}Get started by creating your first campaign!{% else %}No campaigns are currently
+                available to view.{% endif %}</p>
+            {% if user.is_staff %}
+            <a href="{% url 'campaign-create' %}" class="btn btn-primary">Create Campaign</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
