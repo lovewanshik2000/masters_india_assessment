@@ -64,7 +64,7 @@ A comprehensive Django-based discount campaign management system with RESTful AP
 
 1. **Clone the repository**
 ```bash
-cd /path/to/project
+cd masters_india_assessment
 ```
 
 2. **Create virtual environment**
@@ -88,12 +88,7 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-6. **Load sample data (optional)**
-```bash
-python manage.py loaddata sample_data.json
-```
-
-7. **Run development server**
+6. **Run development server**
 ```bash
 python manage.py runserver
 ```
@@ -119,7 +114,7 @@ python manage.py runserver
 ## 📁 Project Structure
 
 ```
-discount_system/
+masters_india_assessment/
 ├── campaigns/                 # Main application
 │   ├── models.py             # Database models
 │   ├── serializers.py        # DRF serializers
@@ -510,7 +505,7 @@ For issues and questions:
 
 ## 📄 License
 
-This project is proprietary software.
+This project is Assignment project for Masters India Orgamization.
 
 ---
 
